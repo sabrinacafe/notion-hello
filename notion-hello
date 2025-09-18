@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Greeting</title>
+  <style>
+    :root { color-scheme: light dark; }
+    html,body{height:100%;margin:0}
+    body{display:grid;place-items:center;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:transparent}
+    #greet{font-size:clamp(20px,6vw,48px);font-weight:600;margin:0}
+  </style>
+</head>
+<body>
+  <h1 id="greet"></h1>
+
+  <script>
+    function isDarkMode() {
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    function applyGreetingColor() {
+      const el = document.getElementById("greet");
+      if (!el) return;
+      el.style.color = isDarkMode() ? "#ffffff" : "#000000";
+      document.body.style.backgroundColor = "transparent";
+    }
+    function dispalyGreetings(today){ // mantém o nome como no seu exemplo
+      let hrs = today.getHours();
+      // permite trocar o nome via ?name=Sabrina
+      const q = new URLSearchParams(location.search);
+      let name = q.get("name") || "Sabrina";
+      let greet = (hrs < 12) ? "Good Morning  " + name
+                : (hrs < 17) ? "Good Afternoon " + name
+                : "Good Evening  " + name;
+      const el = document.getElementById("greet");
+      if (el) el.textContent = greet;
+      applyGreetingColor();
+    }
+    dispalyGreetings(new Date());
+    if (window.matchMedia) {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      mq.addEventListener("change", applyGreetingColor);
+    }
+  </script>
+</body>
+</html>
