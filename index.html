@@ -3,44 +3,101 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Greeting</title>
+  <title>Life Preview</title>
   <style>
-    :root { color-scheme: light dark; }
+    :root { 
+      color-scheme: light dark;               /* respeita o tema do Notion/sistema */
+      --fg: #000;                             /* cor padrão (claro) */
+      --ring: #000;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { 
+        --fg: #fff;                           /* escuro = branco */
+        --ring: #fff;
+      }
+    }
+
     html,body{height:100%;margin:0}
-    body{display:grid;place-items:center;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:transparent}
-    #greet{font-size:clamp(20px,6vw,48px);font-weight:600;margin:0}
+    body{
+      background: transparent;                /* fundo “some” no Notion */
+      display:flex;align-items:flex-start;justify-content:center;
+      font-family: "Times New Roman", Georgia, serif;
+      color: var(--fg);
+    }
+    .wrap{width: min(880px, 92%); margin-top: 20px; text-align:center}
+    .title{
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 14px; letter-spacing: .12em; color: var(--fg); opacity:.8;
+      margin: 0 0 10px;
+    }
+    .card{
+      border: 4px solid var(--ring);          /* borda troca com o tema */
+      border-radius: 10px;
+      padding: 28px 22px;
+      background: transparent;                /* sem fill */
+      color: var(--fg);                       /* texto troca com o tema */
+    }
+    .greet{
+      font-size: clamp(28px, 5vw, 48px);
+      margin: 0 0 8px; letter-spacing: .06em;
+    }
+    .date{
+      margin: 0 0 12px;
+      letter-spacing: .18em;
+      font-size: 14px;
+      opacity: .9;
+    }
+    .clock{
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: .35em; font-size: 14px; margin:0;
+    }
   </style>
 </head>
 <body>
-  <h1 id="greet"></h1>
+  <div class="wrap">
+    <p class="title">Life Preview</p>
+    <div class="card">
+      <h1 id="greet" class="greet">GOOD MORNING</h1>
+      <p id="date" class="date"></p>
+      <p id="clock" class="clock"></p>
+    </div>
+  </div>
 
   <script>
-    function isDarkMode() {
-      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    // nome via ?name=Sabrina
+    const params = new URLSearchParams(location.search);
+    const NAME = params.get("name") || "Sabrina";
+
+    function dispalyGreetings(today){
+      const hrs = today.getHours();
+      const greet =
+        (hrs < 12) ? "GOOD MORNING " + NAME :
+        (hrs < 17) ? "GOOD AFTERNOON " + NAME :
+                     "GOOD EVENING " + NAME;
+      document.getElementById("greet").textContent = greet;
     }
-    function applyGreetingColor() {
-      const el = document.getElementById("greet");
-      if (!el) return;
-      el.style.color = isDarkMode() ? "#ffffff" : "#000000";
-      document.body.style.backgroundColor = "transparent";
+
+    function fmtDate(d){
+      const opts = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' };
+      // UPPERCASE em inglês como no seu modelo
+      return new Intl.DateTimeFormat('en-US', opts)
+        .format(d).toUpperCase().replace(/,/g, ',');
     }
-    function dispalyGreetings(today){ // mantém o nome como no seu exemplo
-      let hrs = today.getHours();
-      // permite trocar o nome via ?name=Sabrina
-      const q = new URLSearchParams(location.search);
-      let name = q.get("name") || "Sabrina";
-      let greet = (hrs < 12) ? "Good Morning  " + name
-                : (hrs < 17) ? "Good Afternoon " + name
-                : "Good Evening  " + name;
-      const el = document.getElementById("greet");
-      if (el) el.textContent = greet;
-      applyGreetingColor();
+
+    function fmtClock(d){
+      const pad = n => String(n).padStart(2,'0');
+      return `${pad(d.getHours())} : ${pad(d.getMinutes())} : ${pad(d.getSeconds())}`;
     }
-    dispalyGreetings(new Date());
-    if (window.matchMedia) {
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      mq.addEventListener("change", applyGreetingColor);
+
+    function tick(){
+      const now = new Date();
+      dispalyGreetings(now);
+      document.getElementById("date").textContent = fmtDate(now);
+      document.getElementById("clock").textContent = fmtClock(now);
     }
+
+    tick();                    // inicial
+    setInterval(tick, 1000);   // relógio
   </script>
 </body>
 </html>
